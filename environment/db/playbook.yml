@@ -1,0 +1,43 @@
+---
+- name: provision db for sparta app
+  hosts: db
+  remote_user: vagrant
+  become_method: sudo
+  become_user: root
+  become: yes
+
+  tasks:
+  - name: update sources
+    apt:
+      update_cache: yes
+
+  - name: install mongo 4
+    become_user: root
+    command: sudo rm /etc/apt/sources.list.d/mongodb*.list
+    command: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+    command: echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+    command: sudo apt-get update
+    command: sudo apt-get install -y mongodb-org --allow-unauthenticated
+
+
+  - name: config template link
+    template:
+      src: mongod.conf
+      dest: /etc/mongod.conf
+      mode: 0777
+    notify:
+      - restart mongod
+
+  - name: start and enable mongod
+    service:
+      name: mongod
+      enabled: yes
+    service:
+      name: mongod
+      state: started
+
+  handlers:
+  - name: restart mongod
+    service:
+      name: mongod
+      state: restarted

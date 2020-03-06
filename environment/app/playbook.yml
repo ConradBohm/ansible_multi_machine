@@ -1,0 +1,74 @@
+---
+- name: provision sparta app
+  hosts: app
+  remote_user: vagrant
+  become_method: sudo
+  become_user: root
+  become: yes
+
+  tasks:
+
+  - name: update sources
+    apt:
+      update_cache: yes
+
+  - name: install nginx and npm
+    apt:
+      pkg:
+        - nginx
+        - npm
+      state: latest
+
+  - name: start and enable nginx
+    service:
+      name: nginx
+      state: started
+    service:
+      name: nginx
+      enabled: yes
+
+  - name: config template link
+    template:
+      src: proxy.conf.erb
+      dest: /etc/nginx/sites-available/proxy.conf
+      mode: 0777
+    notify:
+      - restart nginx
+
+  - name: resource link / sites files in machine
+    file:
+      src: /etc/nginx/sites-enabled/proxy.conf
+      dest: /etc/nginx/sites-available/proxy.conf
+      state: link
+      force: yes
+    notify:
+      - restart nginx
+
+  - name: delete default file
+    file:
+      path: /etc/nginx/sites-enabled/default
+      state: absent
+    notify:
+      - restart nginx
+
+  - name: install nodejs
+    become_user: root
+    command: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    command: apt-get install nodejs -y
+
+  - name: install pm2
+    npm:
+      name: pm2
+      global: yes
+      state: present
+
+  - name: install app dependancies via npm
+    become_user: root
+    command: cd /home/ubuntu/app
+    command: npm install
+
+  handlers:
+  - name: restart nginx
+    service:
+      name: nginx
+      state: restarted
