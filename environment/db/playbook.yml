@@ -11,13 +11,28 @@
     apt:
       update_cache: yes
 
-  - name: install mongo 4
+  - name: make mongodb sources list for apt
+    file:
+      path: /etc/apt/sources.list.d/mongodb-org-4.2.list
+      state: touch
+
+  - name: attaining mongo version
     become_user: root
-    command: sudo rm /etc/apt/sources.list.d/mongodb*.list
+#    command: sudo touch /etc/apt/sources.list.d/mongodb-org-4.2.list
     command: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
-    command: echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
-    command: sudo apt-get update
-    command: sudo apt-get install -y mongodb-org --allow-unauthenticated
+
+  - name: adding mongo version to sources list
+    become_user: root
+    command: echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+
+  # - name: installing mongo
+  #   command: sudo apt-get update
+  #   command: sudo apt-get install -y mongodb-org --allow-unauthenticated
+
+  - name: installing mongo
+    apt:
+      name: mongodb-org
+      update_cache: yes
 
 
   - name: config template link
