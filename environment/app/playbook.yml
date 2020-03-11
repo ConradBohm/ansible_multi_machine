@@ -51,13 +51,16 @@
     notify:
       - restart nginx
 
-  - name: get nodejs version
-    become_user: root
-    command: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+  # - name: get nodejs version
+  #   become_user: root
+  #   command: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 
   - name: install nodejs
-    become_user: root
-    command: apt-get install nodejs -y
+    # become_user: root
+    # command: apt-get install nodejs -y
+    apt:
+      name: nodejs
+      state: latest
 
   - name: install pm2
     npm:
@@ -67,8 +70,21 @@
 
   - name: install app dependancies via npm
     become_user: root
-    command: cd /home/ubuntu/app
-    command: npm install
+    block:
+
+      - name: checking existing sym link
+        stat:
+          path: /usr/bin/node
+        register: links
+
+      - name: create sym link for node
+        command: ln -s /usr/bin/nodejs /usr/bin/node
+        when: links is failed
+         -
+      - name: cd into app home directory
+        command: cd /home/ubuntu/app/
+      - name: install app dependancies
+        command: npm install
 
   handlers:
   - name: restart nginx

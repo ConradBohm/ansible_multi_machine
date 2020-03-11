@@ -16,14 +16,18 @@
       path: /etc/apt/sources.list.d/mongodb-org-4.2.list
       state: touch
 
-  - name: attaining mongo version
-    become_user: root
-#    command: sudo touch /etc/apt/sources.list.d/mongodb-org-4.2.list
-    command: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+  - name: attaining package key
+    # become_user: root
+    # command: sudo touch /etc/apt/sources.list.d/mongodb-org-4.2.list
+    # command: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+    apt_key:
+      url: https://www.mongodb.org/static/pgp/server-4.2.asc
+      state: present
+
 
   - name: adding mongo version to sources list
     become_user: root
-    command: echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+    shell: echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 
   # - name: installing mongo
   #   command: sudo apt-get update
