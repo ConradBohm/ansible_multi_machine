@@ -51,13 +51,17 @@
     notify:
       - restart nginx
 
-- name: install nodejs
+  # - name: get nodejs version
+  #   become_user: root
+  #   command: curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+
+  - name: install nodejs
     # become_user: root
     # command: apt-get install nodejs -y
     apt:
       name: nodejs
       state: latest
-  
+
   - name: install pm2
     npm:
       name: pm2
