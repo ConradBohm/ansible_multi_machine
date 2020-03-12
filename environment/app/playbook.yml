@@ -68,23 +68,26 @@
       global: yes
       state: present
 
-- name: install app dependancies via npm
-    become_user: root
+  - name: install app dependancies via npm
     block:
 
-      - name: checking existing sym link
-        stat:
-          path: /usr/bin/node
-        register: links
+      # - name: checking existing sym link
+      #   stat:
+      #     path: /usr/bin/node
+      #     register: links
 
       - name: create sym link for node
         command: ln -s /usr/bin/nodejs /usr/bin/node
-        when: links is failed
-         -
-      - name: cd into app home directory
-        command: cd /home/ubuntu/app/
+      #  when: links is failed
+
+      # - name: cd into app root directory
+      #   command: cd /home/ubuntu/app/
+
       - name: install app dependancies
-        command: npm install
+        command:
+          chdir: /home/ubuntu/app/
+          cmd: npm install
+
 
   handlers:
   - name: restart nginx

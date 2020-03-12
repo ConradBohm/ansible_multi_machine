@@ -1,2 +1,3 @@
 *.log
 .kitchen
+npm-debug.log.*
